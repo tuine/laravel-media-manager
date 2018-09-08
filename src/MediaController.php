@@ -2,8 +2,8 @@
 
 namespace Tuine\Admin\Media;
 
-use Tuine\Admin\Facades\Admin;
-use Tuine\Admin\Layout\Content;
+use Encore\Admin\Facades\Admin;
+use Encore\Admin\Layout\Content;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 

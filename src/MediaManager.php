@@ -2,8 +2,8 @@
 
 namespace Tuine\Admin\Media;
 
-use Tuine\Admin\Exception\Handler;
-use Tuine\Admin\Extension;
+use Encore\Admin\Exception\Handler;
+use Encore\Admin\Extension;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
