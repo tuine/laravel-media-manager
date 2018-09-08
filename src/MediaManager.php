@@ -106,8 +106,12 @@ class MediaManager extends Extension
     {
         $fullPath = $this->getFullPath($this->path);
 
-        if (File::isFile($fullPath)) {
-            return response()->download($fullPath);
+        if ($this->isLocal) {
+            if (File::isFile($fullPath)) {
+                return response()->download($fullPath);
+            }
+        } else {
+            return $this->storage->download($fullPath);
         }
 
         return response('', 404);
