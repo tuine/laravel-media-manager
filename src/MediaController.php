@@ -20,9 +20,10 @@ class MediaController extends Controller
             $manager = new MediaManager($path);
 
             $content->body(view("laravel-admin-super-media::$view", [
-                'list'   => $manager->ls(),
-                'nav'    => $manager->navigation(),
-                'url'    => $manager->urls(),
+                'list'    => $manager->ls(),
+                'nav'     => $manager->navigation(),
+                'url'     => $manager->urls(),
+                'isLocal' => $manager->isLocal,
             ]));
         });
     }
@@ -39,7 +40,7 @@ class MediaController extends Controller
     public function upload(Request $request)
     {
         $files = $request->file('files');
-        $dir = $request->get('dir', '/');
+        $dir   = $request->get('dir', '/');
 
         $manager = new MediaManager($dir);
 
@@ -78,7 +79,7 @@ class MediaController extends Controller
     public function move(Request $request)
     {
         $path = $request->get('path');
-        $new = $request->get('new');
+        $new  = $request->get('new');
 
         $manager = new MediaManager($path);
 
@@ -99,7 +100,7 @@ class MediaController extends Controller
 
     public function newFolder(Request $request)
     {
-        $dir = $request->get('dir');
+        $dir  = $request->get('dir');
         $name = $request->get('name');
 
         $manager = new MediaManager($dir);

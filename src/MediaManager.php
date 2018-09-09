@@ -45,7 +45,7 @@ class MediaManager extends Extension
      * @var bool
      * Local
      */
-    protected $isLocal = true;
+    public $isLocal = true;
 
     /**
      * MediaManager constructor.
