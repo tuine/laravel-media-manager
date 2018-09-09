@@ -343,7 +343,9 @@ $(function () {
 
                         <td class="action-row">
                             <div class="btn-group btn-group-xs hide">
+                                @unless($item['isDir'])
                                 <a class="btn btn-default file-rename" data-toggle="modal" data-target="#moveModal" data-name="{{ $item['name'] }}"><i class="fa fa-edit"></i></a>
+                                @endunless
                                 <a class="btn btn-default file-delete" data-path="{{ $item['name'] }}"><i class="fa fa-trash"></i></a>
                                 @unless($item['isDir'])
                                 <a target="_blank" href="{{ $item['download'] }}" class="btn btn-default"><i class="fa fa-download"></i></a>

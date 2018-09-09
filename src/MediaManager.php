@@ -174,8 +174,11 @@ class MediaManager extends Extension
     public function exists()
     {
         $path = $this->getFullPath($this->path);
-
-        return file_exists($path);
+        if ($this->isLocal) {
+            return file_exists($path);
+        } else {
+            return $this->storage->exists($path);
+        }
     }
 
     /**
