@@ -104,14 +104,13 @@ class MediaManager extends Extension
 
     public function download()
     {
-        $fullPath = $this->getFullPath($this->path);
-
         if ($this->isLocal) {
+            $fullPath = $this->getFullPath($this->path);
             if (File::isFile($fullPath)) {
                 return response()->download($fullPath);
             }
         } else {
-            return $this->storage->download($fullPath);
+            return $this->storage->download($this->path);
         }
 
         return response('', 404);
@@ -122,11 +121,11 @@ class MediaManager extends Extension
         $paths = is_array($path) ? $path : func_get_args();
 
         foreach ($paths as $path) {
-            $fullPath = $this->getFullPath($path);
             if ($this->isLocal) {
-                $isFile = is_file($fullPath);
+                $fullPath = $this->getFullPath($path);
+                $isFile   = is_file($fullPath);
             } else {
-                $size = $this->storage->size($fullPath);
+                $size = $this->storage->size($path);
                 //It is folder when size is zero
                 if (0 == $size) {
                     $isFile = false;
@@ -173,11 +172,11 @@ class MediaManager extends Extension
 
     public function exists()
     {
-        $path = $this->getFullPath($this->path);
         if ($this->isLocal) {
+            $path = $this->getFullPath($this->path);
             return file_exists($path);
         } else {
-            return $this->storage->exists($path);
+            return $this->storage->exists($this->path);
         }
     }
 
