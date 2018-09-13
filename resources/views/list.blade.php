@@ -54,22 +54,58 @@
     }
 
     .file-icon.has-img>img {
-         max-width: 100%;
-         height: auto;
-         max-height: 92px;
-     }
+        max-width: 100%;
+        height: auto;
+        max-height: 92px;
+    }
 
 </style>
 
 <script data-exec-on-popstate>
 
-$(function () {
-    $('.file-delete').click(function () {
+    $(function () {
+        $('.file-delete').click(function () {
 
-        var path = $(this).data('path');
+            var path = $(this).data('path');
 
-        swal({
-            title: "{{ trans('admin.delete_confirm') }}",
+            swal({
+                title: "{{ trans('admin.delete_confirm') }}",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "{{ trans('admin.confirm') }}",
+                showLoaderOnConfirm: true,
+                cancelButtonText: "{{ trans('admin.cancel') }}",
+                preConfirm: function() {
+                    return new Promise(function(resolve) {
+                        $.ajax({
+                            method: 'delete',
+                            url: '{{ $url['delete'] }}',
+                            data: {
+                                'files[]':[path],
+                                _token:LA.token,
+                            },
+                            success: function (data) {
+                                $.pjax.reload('#pjax-container');
+
+                                resolve(data);
+                            }
+                        });
+                    });
+                }
+            }).then(function(result) {
+                var data = result.value;
+                if (typeof data === 'object') {
+                    if (data.status) {
+                        swal(data.message, '', 'success');
+                    } else {
+                        swal(data.message, '', 'error');
+                    }
+                }
+            });
+
+            /*swal({
+                title: "{{ trans('admin.delete_confirm') }}",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
@@ -97,120 +133,156 @@ $(function () {
                     }
                 }
             });
+        });*/
         });
-    });
 
-    $('#moveModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var name = button.data('name');
+        $('#moveModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var name = button.data('name');
 
-        var modal = $(this);
-        modal.find('[name=path]').val(name)
-        modal.find('[name=new]').val(name)
-    });
+            var modal = $(this);
+            modal.find('[name=path]').val(name)
+            modal.find('[name=new]').val(name)
+        });
 
-    $('#urlModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var url = button.data('url');
+        $('#urlModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var url = button.data('url');
 
-        $(this).find('input').val(url)
-    });
+            $(this).find('input').val(url)
+        });
 
-    $('#file-move').on('submit', function (event) {
+        $('#file-move').on('submit', function (event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        var form = $(this);
+            var form = $(this);
 
-        var path = form.find('[name=path]').val();
-        var name = form.find('[name=new]').val();
+            var path = form.find('[name=path]').val();
+            var name = form.find('[name=new]').val();
 
-        $.ajax({
-            method: 'put',
-            url: '{{ $url['move'] }}',
-            data: {
-                path: path,
-                'new': name,
-                _token:LA.token,
-            },
-            success: function (data) {
-                $.pjax.reload('#pjax-container');
+            $.ajax({
+                method: 'put',
+                url: '{{ $url['move'] }}',
+                data: {
+                    path: path,
+                    'new': name,
+                    _token:LA.token,
+                },
+                success: function (data) {
+                    $.pjax.reload('#pjax-container');
 
-                if (typeof data === 'object') {
-                    if (data.status) {
-                        toastr.success(data.message);
-                    } else {
-                        toastr.error(data.message);
+                    if (typeof data === 'object') {
+                        if (data.status) {
+                            toastr.success(data.message);
+                        } else {
+                            toastr.error(data.message);
+                        }
                     }
                 }
-            }
+            });
+
+            closeModal();
         });
 
-        closeModal();
-    });
+        $('.file-upload').on('change', function () {
+            $('.file-upload-form').submit();
+        });
 
-    $('.file-upload').on('change', function () {
-        $('.file-upload-form').submit();
-    });
+        $('#new-folder').on('submit', function (event) {
 
-    $('#new-folder').on('submit', function (event) {
+            event.preventDefault();
 
-        event.preventDefault();
+            var formData = new FormData(this);
 
-        var formData = new FormData(this);
+            $.ajax({
+                method: 'POST',
+                url: '{{ $url['new-folder'] }}',
+                data: formData,
+                async: false,
+                success: function (data) {
+                    $.pjax.reload('#pjax-container');
 
-        $.ajax({
-            method: 'POST',
-            url: '{{ $url['new-folder'] }}',
-            data: formData,
-            async: false,
-            success: function (data) {
-                $.pjax.reload('#pjax-container');
-
-                if (typeof data === 'object') {
-                    if (data.status) {
-                        toastr.success(data.message);
-                    } else {
-                        toastr.error(data.message);
+                    if (typeof data === 'object') {
+                        if (data.status) {
+                            toastr.success(data.message);
+                        } else {
+                            toastr.error(data.message);
+                        }
                     }
-                }
-            },
-            cache: false,
-            contentType: false,
-            processData: false
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+            closeModal();
         });
 
-        closeModal();
-    });
-
-    function closeModal() {
-        $("#moveModal").modal('toggle');
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    }
-
-    $('.media-reload').click(function () {
-        $.pjax.reload('#pjax-container');
-    });
-
-    $('.goto-url button').click(function () {
-        var path = $('.goto-url input').val();
-        $.pjax({container:'#pjax-container', url: '{{ $url['index'] }}?path=' + path });
-    });
-
-    $('.file-select>input').iCheck({checkboxClass:'icheckbox_minimal-blue'});
-
-    $('.file-delete-multiple').click(function () {
-        var files = $(".file-select input:checked").map(function(){
-            return $(this).val();
-        }).toArray();
-
-        if (!files.length) {
-            return;
+        function closeModal() {
+            $("#moveModal").modal('toggle');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
         }
 
-        swal({
-            title: "{{ trans('admin.delete_confirm') }}",
+        $('.media-reload').click(function () {
+            $.pjax.reload('#pjax-container');
+        });
+
+        $('.goto-url button').click(function () {
+            var path = $('.goto-url input').val();
+            $.pjax({container:'#pjax-container', url: '{{ $url['index'] }}?path=' + path });
+        });
+
+        $('.file-select>input').iCheck({checkboxClass:'icheckbox_minimal-blue'});
+
+        $('.file-delete-multiple').click(function () {
+            var files = $(".file-select input:checked").map(function(){
+                return $(this).val();
+            }).toArray();
+
+            if (!files.length) {
+                return;
+            }
+
+            swal({
+                title: "{{ trans('admin.delete_confirm') }}",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "{{ trans('admin.confirm') }}",
+                showLoaderOnConfirm: true,
+                cancelButtonText: "{{ trans('admin.cancel') }}",
+                preConfirm: function() {
+                    return new Promise(function(resolve) {
+                        $.ajax({
+                            method: 'delete',
+                            url: '{{ $url['delete'] }}',
+                            data: {
+                                'files[]': files,
+                                _token:LA.token,
+                            },
+                            success: function (data) {
+                                $.pjax.reload('#pjax-container');
+
+                                resolve(data);
+                            }
+                        });
+                    });
+                }
+            }).then(function(result) {
+                var data = result.value;
+                if (typeof data === 'object') {
+                    if (data.status) {
+                        swal(data.message, '', 'success');
+                    } else {
+                        swal(data.message, '', 'error');
+                    }
+                }
+            });
+
+            /*swal({
+                title: "{{ trans('admin.delete_confirm') }}",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
@@ -238,9 +310,9 @@ $(function () {
                     }
                 }
             });
+        });*/
         });
     });
-});
 
 </script>
 
@@ -301,7 +373,7 @@ $(function () {
                     <li><a href="{{ route('resources-index') }}"><i class="fa fa-th-large"></i> </a></li>
 
                     @foreach($nav as $item)
-                    <li><a href="{{ $item['url'] }}"> {{ $item['name'] }}</a></li>
+                        <li><a href="{{ $item['url'] }}"> {{ $item['name'] }}</a></li>
                     @endforeach
                 </ol>
                 <ul class="files clearfix">
@@ -310,18 +382,18 @@ $(function () {
                         <li style="height: 200px;border: none;"></li>
                     @else
                         @foreach($list as $item)
-                        <li>
+                            <li>
                             <span class="file-select">
                                 <input type="checkbox" value="{{ $item['name'] }}"/>
                             </span>
 
-                            {!! $item['preview'] !!}
+                                {!! $item['preview'] !!}
 
-                            <div class="file-info">
-                                <a @if(!$item['isDir'])target="_blank"@endif href="{{ $item['link'] }}" class="file-name" title="{{ $item['name'] }}">
-                                    {{ $item['icon'] }} {{ basename($item['name']) }}
-                                </a>
-                            <span class="file-size">
+                                <div class="file-info">
+                                    <a @if(!$item['isDir'])target="_blank"@endif href="{{ $item['link'] }}" class="file-name" title="{{ $item['name'] }}">
+                                        {{ $item['icon'] }} {{ basename($item['name']) }}
+                                    </a>
+                                    <span class="file-size">
                               {{ $item['size'] }}&nbsp;
 
                                 <div class="btn-group btn-group-xs pull-right">
@@ -333,15 +405,15 @@ $(function () {
                                         <li><a href="#" class="file-rename" data-toggle="modal" data-target="#moveModal" data-name="{{ $item['name'] }}">Rename & Move</a></li>
                                         <li><a href="#" class="file-delete" data-path="{{ $item['name'] }}">Delete</a></li>
                                         @unless($item['isDir'])
-                                        <li><a target="_blank" href="{{ $item['download'] }}">Download</a></li>
+                                            <li><a target="_blank" href="{{ $item['download'] }}">Download</a></li>
                                         @endunless
                                         <li class="divider"></li>
                                         <li><a href="#" data-toggle="modal" data-target="#urlModal" data-url="{{ $item['url'] }}">Url</a></li>
                                     </ul>
                                 </div>
                             </span>
-                            </div>
-                        </li>
+                                </div>
+                            </li>
                         @endforeach
                     @endif
                 </ul>
@@ -362,17 +434,17 @@ $(function () {
                 <h4 class="modal-title" id="moveModalLabel">Rename & Move</h4>
             </div>
             <form id="file-move">
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="recipient-name" class="control-label">Path:</label>
-                    <input type="text" class="form-control" name="new" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">Path:</label>
+                        <input type="text" class="form-control" name="new" />
+                    </div>
+                    <input type="hidden" name="path"/>
                 </div>
-                <input type="hidden" name="path"/>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                </div>
             </form>
         </div>
     </div>
