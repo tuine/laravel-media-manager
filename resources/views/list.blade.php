@@ -402,13 +402,17 @@
                                         <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#" class="file-rename" data-toggle="modal" data-target="#moveModal" data-name="{{ $item['name'] }}">Rename & Move</a></li>
+                                        @if($isLocal || !$item['isDir'])
+                                            <li><a href="#" class="file-rename" data-toggle="modal" data-target="#moveModal" data-name="{{ $item['name'] }}">Rename & Move</a></li>
+                                        @endif
                                         <li><a href="#" class="file-delete" data-path="{{ $item['name'] }}">Delete</a></li>
                                         @unless($item['isDir'])
                                             <li><a target="_blank" href="{{ $item['download'] }}">Download</a></li>
                                         @endunless
-                                        <li class="divider"></li>
-                                        <li><a href="#" data-toggle="modal" data-target="#urlModal" data-url="{{ $item['url'] }}">Url</a></li>
+                                        @if($isLocal || !$item['isDir'])
+                                            <li class="divider"></li>
+                                            <li><a href="#" data-toggle="modal" data-target="#urlModal" data-url="{{ $item['url'] }}">Url</a></li>
+                                        @endif
                                     </ul>
                                 </div>
                             </span>
